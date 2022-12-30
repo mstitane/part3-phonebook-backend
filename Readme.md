@@ -17,7 +17,7 @@ with :
 * --region The target region (see 'flyctl platform regions')
 
 add env variables :
-`flyctl secrets set MONGODB_URI='mongodb+srv://mstitane:mstitane@cluster0.eyyfo0t.mongodb.net/phoneBook?retryWrites=true&w=majority' `
+`flyctl secrets set MONGODB_URI='mongodb+srv://mstitane:${pass}@cluster0.eyyfo0t.mongodb.net/phoneBook?retryWrites=true&w=majority' `
 `flyctl secrets set PORT=8080  `
 
 deploy it using :
