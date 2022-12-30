@@ -8,7 +8,7 @@ app.use(cors())
 app.use(express.static('build'))
 
 app.get('/hello', (request, response) => {
-    response.send('<h1>Hello World!</h1>')
+    response.send('<h1> Hello World! </h1>')
 })
 app.get('/info', (request, response) => {
     Person.find({}).then(persons => {
@@ -37,19 +37,21 @@ app.delete('/api/persons/:id', (request, response, next) => {
 })
 app.post('/api/persons', (request, response, next) => {
     const body = request.body
-    if (!body || !body.name || !body.number) {
-        return response.status(400).json({
-            error: 'The name or number is missing'
-        })
-    }
 
-    const person = new Person({
+    const newPerson = new Person({
         name: body.name,
         number: body.number
     })
-    person.save().then(obj => {
-        response.json(obj)
-    }).catch(error => next(error))
+    Person
+        .findOne({name: body.name})
+        .then(exists => {
+            if (exists)
+                response.status(209).send({error: `${body.name} is already exists`})
+            else
+                newPerson.save().then(obj => {
+                    response.json(obj)
+                }).catch(error => next(error))
+        }).catch(error => next(error))
 })
 
 app.put('/api/persons/:id', (request, response, next) => {
@@ -59,7 +61,7 @@ app.put('/api/persons/:id', (request, response, next) => {
         number: body.number,
     }
 
-    Person.findByIdAndUpdate(request.params.id, person, { new: true })
+    Person.findByIdAndUpdate(request.params.id, person, {new: true, runValidators: true, context: 'query'})
         .then(updated => {
             response.json(updated)
         })
@@ -77,6 +79,8 @@ const errorHandler = (error, request, response, next) => {
 
     if (error.name === 'CastError') {
         return response.status(400).send({error: 'malformatted id'})
+    } else if (error.name === 'ValidationError') {
+        return response.status(400).json({error: error.message})
     }
 
     next(error)
