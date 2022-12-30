@@ -1,5 +1,5 @@
 const mongoose = require('mongoose')
-mongoose.set('strictQuery', true);
+mongoose.set('strictQuery', true)
 
 const url = process.env.MONGODB_URI
 
@@ -20,7 +20,7 @@ const personSchema = new mongoose.Schema({
         type: String,
         validate: {
             validator: function (v) {
-                return /^\d{2,3}-\d{5,}$/.test(v);
+                return /^\d{2,3}-\d{5,}$/.test(v)
             },
             message: props => `${props.value} is not a valid phone number!`
         },

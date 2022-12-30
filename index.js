@@ -2,6 +2,7 @@ require('dotenv').config()
 const express = require('express')
 const cors = require('cors')
 const Person = require('./models/person')
+
 const app = express()
 app.use(express.json())
 app.use(cors())
@@ -32,6 +33,8 @@ app.get('/api/persons/:id', (request, response, next) => {
 })
 app.delete('/api/persons/:id', (request, response, next) => {
     Person.findByIdAndDelete(request.params.id).then(person => {
+        if (person)
+            console.log(person.name, 'deleted')
         response.status(204).end()
     }).catch(error => next(error))
 })
@@ -42,11 +45,12 @@ app.post('/api/persons', (request, response, next) => {
         name: body.name,
         number: body.number
     })
+
     Person
-        .findOne({name: body.name})
+        .findOne({ name: body.name })
         .then(exists => {
             if (exists)
-                response.status(209).send({error: `${body.name} is already exists`})
+                response.status(209).send({ error: `${body.name} is already exists` })
             else
                 newPerson.save().then(obj => {
                     response.json(obj)
@@ -61,7 +65,7 @@ app.put('/api/persons/:id', (request, response, next) => {
         number: body.number,
     }
 
-    Person.findByIdAndUpdate(request.params.id, person, {new: true, runValidators: true, context: 'query'})
+    Person.findByIdAndUpdate(request.params.id, person, { new: true, runValidators: true, context: 'query' })
         .then(updated => {
             response.json(updated)
         })
@@ -69,7 +73,7 @@ app.put('/api/persons/:id', (request, response, next) => {
 })
 
 const unknownEndpoint = (request, response) => {
-    response.status(404).send({error: 'unknown endpoint'})
+    response.status(404).send({ error: 'unknown endpoint' })
 }
 
 app.use(unknownEndpoint)
@@ -78,9 +82,9 @@ const errorHandler = (error, request, response, next) => {
     console.error(error.message)
 
     if (error.name === 'CastError') {
-        return response.status(400).send({error: 'malformatted id'})
+        return response.status(400).send({ error: 'malformatted id' })
     } else if (error.name === 'ValidationError') {
-        return response.status(400).json({error: error.message})
+        return response.status(400).json({ error: error.message })
     }
 
     next(error)
